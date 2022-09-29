@@ -1,7 +1,3 @@
-// Copyright (c) 2016 Kelsey Hightower and others. All rights reserved.
-// Use of this source code is governed by the MIT License that can be found in
-// the LICENSE file.
-
 package envconfig
 
 import (
@@ -110,27 +106,27 @@ func toTypeDescription(t reflect.Type) string {
 }
 
 // Usage writes usage information to stdout using the default header and table format
-func Usage(prefix string, spec interface{}) error {
+func Usage(spec any, options ...Option) error {
 	// The default is to output the usage information as a table
 	// Create tabwriter instance to support table output
 	tabs := tabwriter.NewWriter(os.Stdout, 1, 0, 4, ' ', 0)
 
-	err := Usagef(prefix, spec, tabs, DefaultTableFormat)
+	err := Usagef(spec, tabs, DefaultTableFormat, options...)
 	tabs.Flush()
 	return err
 }
 
 // Usagef writes usage information to the specified io.Writer using the specified template specification
-func Usagef(prefix string, spec interface{}, out io.Writer, format string) error {
+func Usagef(spec any, out io.Writer, format string, options ...Option) error {
 
 	// Specify the default usage template functions
 	functions := template.FuncMap{
-		"usage_key":         func(v varInfo) string { return v.Key },
-		"usage_description": func(v varInfo) string { return v.Tags.Get("desc") },
-		"usage_type":        func(v varInfo) string { return toTypeDescription(v.Field.Type()) },
-		"usage_default":     func(v varInfo) string { return v.Tags.Get("default") },
-		"usage_required": func(v varInfo) (string, error) {
-			req := v.Tags.Get("required")
+		"usage_key":         func(v variable) string { return v.key },
+		"usage_description": func(v variable) string { return v.fieldType.Tag.Get("desc") },
+		"usage_type":        func(v variable) string { return toTypeDescription(v.field.Type()) },
+		"usage_default":     func(v variable) string { return v.fieldType.Tag.Get("default") },
+		"usage_required": func(v variable) (string, error) {
+			req := v.fieldType.Tag.Get("required")
 			if req != "" {
 				reqB, err := strconv.ParseBool(req)
 				if err != nil {
@@ -149,13 +145,15 @@ func Usagef(prefix string, spec interface{}, out io.Writer, format string) error
 		return err
 	}
 
-	return Usaget(prefix, spec, out, tmpl)
+	return Usaget(spec, out, tmpl, options...)
 }
 
 // Usaget writes usage information to the specified io.Writer using the specified template
-func Usaget(prefix string, spec interface{}, out io.Writer, tmpl *template.Template) error {
+func Usaget(spec any, out io.Writer, tmpl *template.Template, options ...Option) error {
+	opts := defaultOptions().apply(options...)
+
 	// gather first
-	infos, err := gatherInfo(prefix, spec)
+	infos, err := gatherInfo(spec, opts)
 	if err != nil {
 		return err
 	}

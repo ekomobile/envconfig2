@@ -1,7 +1,3 @@
-// Copyright (c) 2016 Kelsey Hightower and others. All rights reserved.
-// Use of this source code is governed by the MIT License that can be found in
-// the LICENSE file.
-
 package envconfig
 
 import (
@@ -13,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"text/tabwriter"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testUsageTableResult, testUsageListResult, testUsageCustomResult, testUsageBadFormatResult string
@@ -75,7 +73,7 @@ func TestUsageDefault(t *testing.T) {
 	save := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
-	err := Usage("env_config", &s)
+	err := Usage(&s, WithPrefix("env_config"))
 	outC := make(chan string)
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
@@ -98,7 +96,7 @@ func TestUsageTable(t *testing.T) {
 	os.Clearenv()
 	buf := new(bytes.Buffer)
 	tabs := tabwriter.NewWriter(buf, 1, 0, 4, ' ', 0)
-	err := Usagef("env_config", &s, tabs, DefaultTableFormat)
+	err := Usagef(&s, tabs, DefaultTableFormat, WithPrefix("env_config"))
 	tabs.Flush()
 	if err != nil {
 		t.Error(err.Error())
@@ -110,7 +108,7 @@ func TestUsageList(t *testing.T) {
 	var s Specification
 	os.Clearenv()
 	buf := new(bytes.Buffer)
-	err := Usagef("env_config", &s, buf, DefaultListFormat)
+	err := Usagef(&s, buf, DefaultListFormat, WithPrefix("env_config"))
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -121,7 +119,7 @@ func TestUsageCustomFormat(t *testing.T) {
 	var s Specification
 	os.Clearenv()
 	buf := new(bytes.Buffer)
-	err := Usagef("env_config", &s, buf, "{{range .}}{{usage_key .}}={{usage_description .}}\n{{end}}")
+	err := Usagef(&s, buf, "{{range .}}{{usage_key .}}={{usage_description .}}\n{{end}}", WithPrefix("env_config"))
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -133,12 +131,9 @@ func TestUsageUnknownKeyFormat(t *testing.T) {
 	unknownError := "template: envconfig:1:2: executing \"envconfig\" at <.UnknownKey>"
 	os.Clearenv()
 	buf := new(bytes.Buffer)
-	err := Usagef("env_config", &s, buf, "{{.UnknownKey}}")
-	if err == nil {
-		t.Errorf("expected 'unknown key' error, but got no error")
-	}
-	if !strings.Contains(err.Error(), unknownError) {
-		t.Errorf("expected '%s', but got '%s'", unknownError, err.Error())
+	err := Usagef(&s, buf, "{{.UnknownKey}}", WithPrefix("env_config"))
+	if assert.Errorf(t, err, "expected 'unknown key' error, but got no error") {
+		assert.Contains(t, err.Error(), unknownError)
 	}
 }
 
@@ -147,9 +142,8 @@ func TestUsageBadFormat(t *testing.T) {
 	os.Clearenv()
 	// If you don't use two {{}} then you get a lieteral
 	buf := new(bytes.Buffer)
-	err := Usagef("env_config", &s, buf, "{{range .}}{.Key}\n{{end}}")
-	if err != nil {
-		t.Error(err.Error())
-	}
+	err := Usagef(&s, buf, "{{range .}}{.key}\n{{end}}", WithPrefix("env_config"))
+	assert.NoError(t, err)
+
 	compareUsage(testUsageBadFormatResult, buf.String(), t)
 }

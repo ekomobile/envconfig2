@@ -2,6 +2,9 @@
 
 This is fork of [github.com/kelseyhightower/envconfig](github.com/kelseyhightower/envconfig).
 
+Key differences:
+  * loading secrets from files pointed by `*_FILE` variables. 
+
 [![Build Status](https://travis-ci.org/ekomobile/envconfig2.svg)](https://travis-ci.org/ekomobile/envconfig2)
 
 ```Go
@@ -51,7 +54,7 @@ type Specification struct {
 
 func main() {
     var s Specification
-    err := envconfig.Process("myapp", &s)
+    err := envconfig.Process(&s, envconfig.WithPrefix("env_config"))
     if err != nil {
         log.Fatal(err.Error())
     }
