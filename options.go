@@ -39,6 +39,7 @@ func (o *options) copy() *options {
 		prefix:            o.prefix,
 		isLoadFromFile:    o.isLoadFromFile,
 		defaultFileSuffix: o.defaultFileSuffix,
+		trimSpaces:        o.trimSpaces,
 	}
 }
 
