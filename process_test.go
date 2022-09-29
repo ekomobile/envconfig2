@@ -875,6 +875,36 @@ func TestErrorMessageForRequiredAltVar(t *testing.T) {
 	}
 }
 
+func TestTrimSpacesByDefault(t *testing.T) {
+	var s struct {
+		Value string
+	}
+
+	expectedValue := "the_value"
+
+	os.Clearenv()
+	os.Setenv("ENV_CONFIG_VALUE", " \t \n "+expectedValue+"\n \r\n ")
+
+	err := Process(&s, WithPrefix("env_config"))
+	assert.NoError(t, err)
+	assert.Equal(t, expectedValue, s.Value)
+}
+
+func TestTrimSpacesDisabled(t *testing.T) {
+	var s struct {
+		Value string
+	}
+
+	expectedValue := " \t \n the_value\n \r\n "
+
+	os.Clearenv()
+	os.Setenv("ENV_CONFIG_VALUE", expectedValue)
+
+	err := Process(&s, WithPrefix("env_config"), WithoutTrimSpaces())
+	assert.NoError(t, err)
+	assert.Equal(t, expectedValue, s.Value)
+}
+
 type bracketed string
 
 func (b *bracketed) Set(value string) error {

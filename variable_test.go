@@ -24,7 +24,6 @@ func Test_variable_loadFromFile(t *testing.T) {
 			data: data{
 				secretValue: "qwerty",
 				setEnvKey:   "ENV_CONFIG_SECRET" + DefaultFileSuffix,
-				fileSuffix:  "",
 				opts: []Option{
 					WithPrefix("env_config"),
 				},
@@ -55,6 +54,28 @@ func Test_variable_loadFromFile(t *testing.T) {
 				},
 			},
 			expected: "",
+		},
+		{
+			name: "file with LF at the end",
+			data: data{
+				secretValue: "qwerty\n",
+				setEnvKey:   "ENV_CONFIG_SECRET" + DefaultFileSuffix,
+				opts: []Option{
+					WithPrefix("env_config"),
+				},
+			},
+			expected: "qwerty",
+		},
+		{
+			name: "file with CRLF at the end",
+			data: data{
+				secretValue: "qwerty\r\n",
+				setEnvKey:   "ENV_CONFIG_SECRET" + DefaultFileSuffix,
+				opts: []Option{
+					WithPrefix("env_config"),
+				},
+			},
+			expected: "qwerty",
 		},
 	}
 	for _, tt := range tests {
