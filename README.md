@@ -15,7 +15,7 @@ import "github.com/ekomobile/envconfig2"
 
 ## Documentation
 
-See [godoc](http://godoc.org/github.com/ekomobile/envconfig2)
+See [godoc](https://pkg.go.dev/github.com/ekomobile/envconfig2)
 
 ## Usage
 
