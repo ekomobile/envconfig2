@@ -1,11 +1,13 @@
 # envconfig2
 
-This is fork of [github.com/kelseyhightower/envconfig](github.com/kelseyhightower/envconfig).
+This is fork of [https://github.com/kelseyhightower/envconfig](https://github.com/kelseyhightower/envconfig).
 
 Key differences:
   * loading secrets from files pointed by `*_FILE` variables. 
 
-[![Build Status](https://travis-ci.org/ekomobile/envconfig2.svg)](https://travis-ci.org/ekomobile/envconfig2)
+[![GitHub release](https://img.shields.io/github/release/ekomobile/envconfig2.svg)](https://github.com/ekomobile/envconfig2/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ekomobile/envconfig2)](https://goreportcard.com/report/github.com/ekomobile/envconfig2)
+[![Go Reference](https://pkg.go.dev/badge/github.com/ekomobile/envconfig2.svg)](https://pkg.go.dev/github.com/ekomobile/envconfig2)
 
 ```Go
 import "github.com/ekomobile/envconfig2"
