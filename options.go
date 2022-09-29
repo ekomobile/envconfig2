@@ -11,6 +11,7 @@ type (
 		prefix            string
 		isLoadFromFile    bool
 		defaultFileSuffix string
+		trimSpaces        bool
 	}
 
 	Option func(o *options)
@@ -21,6 +22,7 @@ func defaultOptions() *options {
 		prefix:            "",
 		isLoadFromFile:    true,
 		defaultFileSuffix: DefaultFileSuffix,
+		trimSpaces:        true,
 	}
 }
 
@@ -46,6 +48,7 @@ func WithPrefix(prefix string) Option {
 	}
 }
 
+// WithoutDefaultLoadingFromFiles disables loading values from files pointed by *_FILE vars.
 func WithoutDefaultLoadingFromFiles() Option {
 	return func(o *options) {
 		o.isLoadFromFile = false
@@ -60,5 +63,12 @@ func WithDefaultFileSuffix(suffix string) Option {
 
 	return func(o *options) {
 		o.defaultFileSuffix = suffix
+	}
+}
+
+// WithoutTrimSpaces disables spaces trimming around value (see strings.TrimSpace).
+func WithoutTrimSpaces() Option {
+	return func(o *options) {
+		o.trimSpaces = false
 	}
 }

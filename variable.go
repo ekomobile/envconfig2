@@ -101,26 +101,43 @@ func (v *variable) isRequired() bool {
 }
 
 func (v *variable) value() (value string, isLoaded bool, err error) {
-	envNames := []string{v.key, v.altKey}
+	envNames := []string{v.key}
+
+	if v.altKey != "" {
+		envNames = append(envNames, v.altKey)
+	}
 
 	for _, envName := range envNames {
-		// ENV value
-		if value, isLoaded = os.LookupEnv(envName); isLoaded {
+		value, isLoaded, err = v.tryEnv(envName)
+		if err != nil {
 			return
 		}
-
-		// Load from file
-		if value, isLoaded, err = v.loadFromFile(envName); isLoaded || err != nil {
-			return
+		if isLoaded { // Found some value
+			break
 		}
 	}
 
-	// default value
+	// Trim space
+	if isLoaded && v.Opts.trimSpaces {
+		value = strings.TrimSpace(value)
+	}
+
+	// Load default value
 	if !isLoaded {
 		value, isLoaded = v.fieldType.Tag.Lookup(TagDefault)
 	}
 
 	return
+}
+
+func (v *variable) tryEnv(envName string) (value string, isLoaded bool, err error) {
+	// ENV value
+	if value, isLoaded = os.LookupEnv(envName); isLoaded {
+		return
+	}
+
+	// Load from file
+	return v.loadFromFile(envName)
 }
 
 func (v *variable) loadFromFile(envName string) (value string, isLoaded bool, err error) {
